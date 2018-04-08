@@ -1,4 +1,4 @@
-#include "md.hpp"
+#include "md.h"
 
 int	main(int argc, char **argv)
 {
@@ -7,7 +7,7 @@ int	main(int argc, char **argv)
 	if (pID == 0)
 	{
 		if (getuid() == 0)
-			return (daemon(argc, argv));
+			return (ddaemon(argc, argv));
 		else
 		{
 			printf("Not Root !\n");

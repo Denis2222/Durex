@@ -1,4 +1,4 @@
-#include "md.hpp"
+#include "md.h"
 
 #define OK 1
 #define NOK 0
@@ -6,9 +6,7 @@
 int	setup_env(t_env *e) {
 	e->connected = 0;
 	e->exit = 1;
-	e->report.Logstd("Started", INFO);
 	if (islock()) {
-		e->report.Logstd("Already Start .lock exist", ERROR);
 		return (NOK);
 	}
 
@@ -20,7 +18,6 @@ int	setup_env(t_env *e) {
 	//Init Socket
 	e->sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (e->sock == -1) {
-		e->report.Logstd("Socket() Error", ERROR);
 		return (NOK);
 	}
 
@@ -34,26 +31,25 @@ int	setup_env(t_env *e) {
 	e->sin.sin_port = htons(PORT);
 
 	if (bind(e->sock, (struct sockaddr *)&e->sin, sizeof(e->sin)) == -1) {
-		e->report.Logstd("Bind() Error Port already in use !", ERROR);
 		return (NOK);
 	}
 	if (listen(e->sock, 5) == -1) {
-		e->report.Logstd("Listen() Error", ERROR);
 		return (NOK);
 	}
 	return (OK);
 }
 
-int daemon(int argc, char **argv) {
+int ddaemon(int argc, char **argv) {
 	t_env		e;
 	pthread_t	thread[3];
-	ge = &e;
 	setup_signal();
+
+	(void)argc;
+	(void)argv;
 	if (setup_env(&e) == NOK)
 		return (0);
 
 	lock();
-	e.report.Logstd("Daemon Ready !", INFO);
 	while (e.exit) {
 		t_sinsock *tss;
 		tss = (t_sinsock*)malloc(sizeof(t_sinsock));
@@ -66,9 +62,8 @@ int daemon(int argc, char **argv) {
 
 		tss->env = &e;
 
-		std::string newcon("Connection detected ! FROM : ");
-		newcon.append(inet_ntoa(tss->csin.sin_addr));
-		e.report.Logstd(newcon , INFO);
+//		std::string newcon("Connection detected ! FROM : ");
+//		newcon.append(inet_ntoa(tss->csin.sin_addr));
 
 		int	full;
 
@@ -83,7 +78,6 @@ int daemon(int argc, char **argv) {
 			}
 		}
 		if (full) {
-			e.report.Logstd("Max connected ! reject ", INFO);
 			char str[]  = "Limit connection";
 			write(tss->csock, str, strlen(str));
 			close(tss->csock);
@@ -92,7 +86,6 @@ int daemon(int argc, char **argv) {
 	}
 
 	close(e.sock);
-	e.report.Logstd(" Exit Program ", INFO);
 	unlock();
 	return (0);
 }

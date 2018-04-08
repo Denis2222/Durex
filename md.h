@@ -1,27 +1,24 @@
-#include <iostream>
 #include <unistd.h>
-#include <signal.h>
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <pthread.h>
+#include <errno.h>
+#include <strings.h>
+#include <string.h>
+
+#include <sys/types.h>
+#include <signal.h>
+
 #include <fcntl.h>
-#include <unistd.h>
 
 #include <sys/file.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include <signal.h> // sigaction(), sigsuspend(), sig*()
-#include <pthread.h>
-#include <errno.h>
-#include <string.h>
-#include <string>
-#include <iostream>
-#include <sstream>
 
 #define PORT       4242
 #define MAX_CLIENT 3
@@ -38,8 +35,6 @@ enum					e_logtype
 	LOG,
 	ERROR
 };
-
-#include "Tintin_reporter.hpp"
 
 typedef struct			s_sinsock
 {
@@ -58,8 +53,6 @@ typedef struct			s_env
 	int					exit;
 	struct sockaddr_in	sin;
 
-	Tintin_reporter		report;
-
 	//Unsafe
 	int					connected;
 	pthread_mutex_t		mutex;
@@ -74,9 +67,6 @@ void	lock();
 void	unlock();
 
 void	*thread_client(void *sin_sock);
-int		daemon(int argc, char **argv);
+int		ddaemon(int argc, char **argv);
 void	sighandler(int signo);
 void	setup_signal();
-
-static t_env *ge;
-

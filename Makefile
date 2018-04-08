@@ -1,13 +1,12 @@
-NAME	= Matt_daemon
-SRC		=	main.cpp \
-			lock.cpp \
-			thread.cpp \
-			daemon.cpp \
-			signal.cpp \
-			Tintin_reporter.cpp
+NAME	= Durex
+SRC		=	main.c \
+			lock.c \
+			thread.c \
+			daemon.c \
+			signal.c
 
-OBJ			= $(SRC:.cpp=.o)
-CC			= g++ -lpthread -std=c++11 -Wall -Werror -Wextra
+OBJ			= $(SRC:.c=.o)
+CC			= gcc  -D_POSIX_C_SOURCE -std=c99 -lpthread -Wall -Werror -Wextra
 
 $(NAME): $(OBJ)
 	$(CC) $(OBJ) -o $(NAME)

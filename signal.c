@@ -1,4 +1,4 @@
-#include "md.hpp"
+#include "md.h"
 
 void	setup_signal()
 {
@@ -15,11 +15,11 @@ void	setup_signal()
 
 void sighandler(int signo)
 {
-	std::stringstream ss;
-	ss << "Signal Catch : [" << signo << "]";
-	ge->report.Logstd(ss.str(), INFO);
+//	std::stringstream ss;
+//	ss << "Signal Catch : [" << signo << "]";
 
-	ge->report.Logstd(" Exit Program ", INFO);
+	(void)signo;
+
 	unlock();
 	exit(0);	
 }

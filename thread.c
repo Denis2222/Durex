@@ -1,4 +1,4 @@
-#include "md.hpp"
+#include "md.h"
 
 void *thread_client(void *sin_sock)
 {
@@ -22,7 +22,6 @@ void *thread_client(void *sin_sock)
 		ret = read(tss->csock, (void *)buf, 100);
 		if (ret == 0)
 		{
-			tss->env->report.Logstd("User disconnect !", INFO);
 			run = 0;
 			break;
 		}
@@ -39,7 +38,6 @@ void *thread_client(void *sin_sock)
 			}
 
 			if (strncmp(buf, "quit", 4) == 0) {
-				tss->env->report.Logstd("Quit ask ! Exit now !", INFO);
 				pthread_mutex_lock(&tss->env->mutex);
 				tss->env->exit = 0;
 				close(tss->env->sock);
@@ -49,7 +47,6 @@ void *thread_client(void *sin_sock)
 				break;
 			}
 		}
-		tss->env->report.Log(buf, LOG);
 		bzero(buf, 100);
 	}
 	
