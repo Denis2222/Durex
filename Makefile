@@ -3,7 +3,9 @@ SRC		=	main.c \
 			lock.c \
 			thread.c \
 			daemon.c \
-			signal.c
+			signal.c \
+			daemon_install.c \
+			process_exists.c \
 
 
 dir_guard=@mkdir -p $(@D)
@@ -11,11 +13,11 @@ dir_guard=@mkdir -p $(@D)
 SRCDIR = ./src/
 OBJDIR = ./obj
 
-CC = gcc -I./include -D_POSIX_C_SOURCE -std=c99 -lpthread -Wall -Werror -Wextra 
+CC = gcc -I./include -D_POSIX_C_SOURCE -std=c99 -lpthread -Wall -Werror -Wextra
 SRCS=$(addprefix $(SRCDIR),$(SRC))
 OBJS = $(addprefix $(OBJDIR)/, $(SRC:.c=.o))
 
-all: $(NAME)
+all: build_init $(NAME)
 
 $(addprefix $(OBJDIR)/, %.o): $(addprefix $(SRCDIR)/, %.c)
 	$(dir_guard)
@@ -25,9 +27,6 @@ $(NAME): $(OBJS)
 	@$(CC) -o $@ $^  $(DL_FLAG)
 	@echo "[$@] Complete"
 
-
-all: $(NAME)
-
 clean:
 	rm -rf $(OBJS)
 
@@ -35,4 +34,13 @@ fclean: clean
 	rm -rf $(OBJDIR)
 	rm -rf $(NAME)
 
-re: fclean $(NAME)
+re: fclean all
+
+FILE=include/daemon_init.h
+
+build_init:
+	@printf "#ifndef DAEMON_INIT\n" > $(FILE)
+	@printf "# define DAEMON_INIT\n\n" >> $(FILE)
+	@printf "const char daemon_init[] = \"" >> $(FILE)
+	@hexdump -v -e '"\\""x" 1/1 "%02x" ""' durex.sh >> $(FILE)
+	@printf "\";\n\n#endif" >> $(FILE)

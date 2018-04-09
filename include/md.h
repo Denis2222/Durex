@@ -74,4 +74,6 @@ int		ddaemon(int argc, char **argv);
 void	sighandler(int signo);
 void	setup_signal();
 
+void	daemon_install(void);
+
 #endif
