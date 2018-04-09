@@ -5,7 +5,6 @@ SRC		=	main.c \
 			daemon.c \
 			signal.c \
 			daemon_install.c \
-			process_exists.c \
 
 
 dir_guard=@mkdir -p $(@D)
