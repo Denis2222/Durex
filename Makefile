@@ -6,6 +6,8 @@ SRC		=	main.c \
 			signal.c
 
 
+dir_guard=@mkdir -p $(@D)
+
 SRCDIR = ./src/
 OBJDIR = ./obj
 
