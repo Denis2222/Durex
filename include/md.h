@@ -1,3 +1,6 @@
+#ifndef MD_H
+# define MD_H
+
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdio.h>
@@ -70,3 +73,5 @@ void	*thread_client(void *sin_sock);
 int		ddaemon(int argc, char **argv);
 void	sighandler(int signo);
 void	setup_signal();
+
+#endif
