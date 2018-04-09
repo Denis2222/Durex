@@ -5,18 +5,32 @@ SRC		=	main.c \
 			daemon.c \
 			signal.c
 
-OBJ			= $(SRC:.c=.o)
-CC			= gcc  -D_POSIX_C_SOURCE -std=c99 -lpthread -Wall -Werror -Wextra
 
-$(NAME): $(OBJ)
-	$(CC) $(OBJ) -o $(NAME)
+SRCDIR = ./src/
+OBJDIR = ./obj
+
+CC = gcc -I./include -D_POSIX_C_SOURCE -std=c99 -lpthread -Wall -Werror -Wextra 
+SRCS=$(addprefix $(SRCDIR),$(SRC))
+OBJS = $(addprefix $(OBJDIR)/, $(SRC:.c=.o))
+
+all: $(NAME)
+
+$(addprefix $(OBJDIR)/, %.o): $(addprefix $(SRCDIR)/, %.c)
+	$(dir_guard)
+	@$(CC)  -o $@ -c $^
+
+$(NAME): $(OBJS)
+	@$(CC) -o $@ $^  $(DL_FLAG)
+	@echo "[$@] Complete"
+
 
 all: $(NAME)
 
 clean:
-	rm -rf $(OBJ)
+	rm -rf $(OBJS)
 
 fclean: clean
+	rm -rf $(OBJDIR)
 	rm -rf $(NAME)
 
 re: fclean $(NAME)
