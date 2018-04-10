@@ -52,7 +52,7 @@ int		build_daemon(int argc, char **argv)
 	printf("%s\n", get_login());
 	if (build_status() == 1)
 		return (0);
-	return (durex(argc, argv));
+	return (durex_daemon());
 }
 
 int		has_root_rights(void)

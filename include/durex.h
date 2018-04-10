@@ -24,14 +24,21 @@ typedef enum		e_bool
 }					t_bool;
 
 #define PORT       4242
-#define MAX 3
+#define MAX_CLIENT 3
 
 #define HELP "Durex v1.0: Available command:\nhelp\nshell\nquit\n"
 
-typedef struct	s_client {
-	int pid;
-	int socket;
-}				t_client;
+typedef struct			s_client
+{
+	pid_t				pid;
+	int					socket;
+}						t_client;
+
+typedef struct			s_durex
+{
+	t_client			clients[MAX_CLIENT];
+	int					socket;
+}						t_durex;
 
 /*
 ** UTILS
@@ -49,11 +56,38 @@ char			*file_base_name(const char *file_path);
 char			*file_absolute_path(const char *file_path);
 char			**ft_split_string(char const *s, char *c);
 char			*ft_dstrjoin(char *s1, char *s2, short flag);
-
-int				main(int argc, char **argv);
-int				durex(int argc, char **argv);
-void			daemon_install(void);
+/*
+** PROCESSES EXISTS
+*/
 BOOLEAN			processes_exists(char **names);
 int				processes_exists_pid(char **names);
+/*
+** SOCKET SERVER
+*/
+int				new_socket_server(int port);
+void			socket_server_handler(t_durex *durex);
+/*
+** CLIENT
+*/
+void			new_client(t_client *client);
+int				client_slot(void);
+/*
+** SIGNALS
+*/
+void			signal_handler(int sig);
+/*
+** SHELL
+*/
+int				bash_prompt( int sck );
+/*
+** DUREX
+*/
+int				durex_daemon(void);
+t_durex			*get_durex(void);
+/*
+** PROGRAM
+*/
+int				main(int argc, char **argv);
+void			daemon_install(void);
 
 #endif

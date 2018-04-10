@@ -16,6 +16,10 @@ SRC		=	utils/ft_strnew.c													\
 			durex.c																\
 			daemon_install.c													\
 			processes_exists.c													\
+			shell.c																\
+			socket.c															\
+			client.c															\
+			signals.c															\
 
 
 dir_guard=@mkdir -p $(@D)
