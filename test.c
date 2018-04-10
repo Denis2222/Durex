@@ -153,10 +153,27 @@ int main( int argc, char** argv)
 	printf("Really refresh ? \n");
 
 	while( -1 != (client = accept( sck, (struct sockaddr*)&peer_addr, &addrlen ) ) ) {
-		child_pid = fork();
-		if( child_pid == 0 ) {
-			//child[slot].pid = getpid();
-			new_child(client);
+		int slot = -1;
+		slot = child_slot();
+		if (slot >= 0)
+		{
+
+			child[slot].socket = client;
+			nb++;
+			child_pid = fork();
+			if( child_pid == 0 ) {
+				slot = child_slot();
+				int pid = getpid();
+				printf("slot : %d | %d \n", slot, pid);
+				child[slot].pid = pid;
+				//getpid();
+				sleep(1);
+				new_child(client);
+			}
+		} else {
+			dprintf(client, "Already %d connected ! Go Away \n", nb);
+			write(client, "", 0);
+			close(client);
 		}
 	}
 	exit(1);
