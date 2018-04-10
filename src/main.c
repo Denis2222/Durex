@@ -23,11 +23,22 @@ int		build_daemon(int argc, char **argv)
 	return (durex(argc, argv));
 }
 
+const char *get_login()
+{
+	uid_t uid = geteuid();
+	struct passwd *pw = getpwuid(uid);
+	if (pw)
+	{
+		return pw->pw_name;
+	}
+	return "";
+}
+
 int		has_root_rights(void)
 {
 	if (getuid() == 0)
 		return (1);
-	printf("Not Root !\n");
+	printf("Not root: %s\n", get_login());
 	return (0);
 }
 
