@@ -1,26 +1,30 @@
-#include "md.h"
+#include "durex.h"
 
 int		build_status(void)
 {
-	return (1);
+	char* process[] = { "Durex", NULL };
+
+	if (processes_exists((char**)&process[0]) == true)
+		return (1);
+	return (0);
+}
+
+int		build_pid(void)
+{
+	char* process[] = { "Durex", NULL };
+
+	int pid = processes_exists_pid((char**)&process[0]);
+
+	printf("%d\n", pid);
+	if (pid != -1)
+		return (1);
+	return (0);
 }
 
 int		build_version(void)
 {
 	printf("Durex Ver 1.0.0, for debian-linux-gnu (x86_64)\n");
 	return (0);
-}
-
-int		build_daemon(int argc, char **argv)
-{
-	for (int i = 1; i < argc; i++)
-	{
-		if (strcmp(argv[i], "status") == 0)
-			return (build_status());
-		if (strcmp(argv[i], "version") == 0)
-			return (build_version());
-	}
-	return (durex(argc, argv));
 }
 
 const char *get_login()
@@ -32,6 +36,23 @@ const char *get_login()
 		return pw->pw_name;
 	}
 	return "";
+}
+
+int		build_daemon(int argc, char **argv)
+{
+	for (int i = 1; i < argc; i++)
+	{
+		if (strcmp(argv[i], "status") == 0)
+			return (build_status());
+		if (strcmp(argv[i], "pid") == 0)
+			return (build_pid());
+		if (strcmp(argv[i], "version") == 0)
+			return (build_version());
+	}
+	printf("%s\n", get_login());
+	if (build_status() == 1)
+		return (0);
+	return (durex(argc, argv));
 }
 
 int		has_root_rights(void)

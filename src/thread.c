@@ -1,4 +1,4 @@
-#include "md.h"
+#include "durex.h"
 
 void *thread_client(void *sin_sock)
 {

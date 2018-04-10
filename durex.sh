@@ -15,17 +15,16 @@
 #
 set -e
 set -u
-${DEBIAN_SCRIPT_DEBUG:+ set -v -x}
-
-test -x /usr/bin/mysqld_safe || exit 0
+${DEBIAN_SCRIPT_DEBUG:+ set -v -x};
 
 . /lib/lsb/init-functions
 
+PATH="/usr/bin/:/bin/"
 SELF=$(cd $(dirname $0); pwd -P)/$(basename $0)
 DUREX="/usr/bin/Durex"
 
 # priority can be overriden and "-s" adds output to stderr
-ERR_LOGGER="logger -p daemon.err -t /etc/init.d/durex -i"
+ERR_LOGGER="logger -p daemon.err -t /etc/init.d/Durex -i"
 
 # Safeguard (relative paths, core dumps..)
 cd /
@@ -72,13 +71,10 @@ case "${1:-''}" in
   'stop')
 	log_daemon_msg "Stopping Durex server" "durex"
 	log_end_msg 0
-	if ! durex_status check_dead nowarn; then
-		set +e
-		set -e
-		killall -15 Durex 2>&1
+	if durex_status check_alive nowarn; then
+		kill -15 `$DUREX pid`
 	fi
-	if ! durex_status check_dead warn; then
-		log_end_msg 1
+	if durex_status check_alive nowarn; then
 		log_failure_msg "Please stop Durex manually !"
 		exit -1
 	fi

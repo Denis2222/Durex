@@ -1,3 +1,5 @@
+#include "durex.h"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -10,8 +12,6 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
-
-#include <md.h>
 
 t_client *client; //Map shared between fork
 
@@ -113,7 +113,7 @@ int durex( int argc, char** argv) {
 		client[i].socket = -1;
 	}
 	signal(SIGCHLD, handler);
-	
+
 	//Boring Init Socket
 	addrlen = sizeof( struct sockaddr_in );
 	memset(&this_addr, 0, addrlen );
@@ -126,7 +126,7 @@ int durex( int argc, char** argv) {
     setsockopt(sck, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 	bind( sck, (struct sockaddr*)&this_addr, addrlen );
 	listen( sck, 5 );
-	
+
 	//Accept loop
 	while( -1 != (sck_client = accept( sck, (struct sockaddr*)&peer_addr, (socklen_t *)&addrlen ) ) ) {
 		int slot = -1;
