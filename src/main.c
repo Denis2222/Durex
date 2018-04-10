@@ -20,7 +20,7 @@ int		build_daemon(int argc, char **argv)
 		if (strcmp(argv[i], "version") == 0)
 			return (build_version());
 	}
-	return (ddaemon(argc, argv));
+	return (durex(argc, argv));
 }
 
 int		has_root_rights(void)

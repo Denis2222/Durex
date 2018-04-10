@@ -1,9 +1,6 @@
 NAME	= Durex
 SRC		=	main.c \
-			lock.c \
-			thread.c \
-			daemon.c \
-			signal.c \
+			durex.c \
 			daemon_install.c \
 
 
@@ -12,7 +9,7 @@ dir_guard=@mkdir -p $(@D)
 SRCDIR = ./src/
 OBJDIR = ./obj
 
-CC = gcc -I./include -D_POSIX_C_SOURCE -std=c99 -lpthread -Wall -Werror -Wextra
+CC = gcc -I./include -lpthread -Wall -Wextra -Werror
 SRCS=$(addprefix $(SRCDIR),$(SRC))
 OBJS = $(addprefix $(OBJDIR)/, $(SRC:.c=.o))
 
@@ -43,3 +40,9 @@ build_init:
 	@printf "const char daemon_init[] = \"" >> $(FILE)
 	@hexdump -v -e '"\\""x" 1/1 "%02x" ""' durex.sh >> $(FILE)
 	@printf "\";\n\n#endif" >> $(FILE)
+
+
+test:
+	rm -f ./serv
+	gcc test.c -o serv
+	./serv
