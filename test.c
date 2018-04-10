@@ -15,15 +15,14 @@
 
 static int nb;
 
-typedef struct	s_child{
+typedef struct	s_child {
 	int pid;
 	int socket;
 }				t_child;
 
 t_child *child;
 
-int bash_prompt( int sck )
-{
+int bash_prompt( int sck ) {
 	close(0);
 	close(1);
 	close(2);
@@ -36,78 +35,82 @@ int bash_prompt( int sck )
 	setvbuf(stdin, NULL, _IONBF, 0);
 	printf("Remote shell ready:\n");
 	execl( "/bin/bash", "/bin/bash", "-c", "bash" );
-	//perror("execl");
 	exit(1);
 }
 
-void new_child(int sck)
-{
+void new_child(int sck) {
 	char 	*buf;
 	int 	run;
 	int		ret;
-
+	int		login = 0;
 	run = 1;
 	buf = (char *)malloc(100);
 
 	int gotoshell = 0;
-	bzero(buf, 100);
-	while(run)
-	{
+
+	dprintf(sck, "Enter password : ");
+	while(run) {
+		bzero(buf, 100);
 		ret = read(sck, (void *)buf, 100);
-		if (ret == 0)
-		{
+		if (ret == 0) {
 			run = 0;
 			break;
 		}
-		if (ret > 0)
-		{
+		if (ret > 0) {
 			buf[ret - 1] = '\0';
-			if (strncmp(buf, "help", 4) == 0) {
-				write(sck, "You really need help?\n", 23);
-			} else if (strncmp(buf, "shell", 5) == 0) {
-				bash_prompt(sck);
-			} else if (strncmp(buf, "quit", 4) == 0) {
-				run = 0;
+
+			if (!login) {
+				if (strcmp(buf, "test") == 0) { //TODO password
+					dprintf(sck, "Welcome home : \n");
+					login = 1;
+				} else {
+					run = 0;
+				}
+
+			} else if (login) { //Secure zone
+ 				if (strncmp(buf, "help", 4) == 0) {
+					dprintf(sck, "Durex v1.0: Available command:\nhelp\nshell\nquit\n");
+				} else if (strncmp(buf, "shell", 5) == 0) {
+					bash_prompt(sck);
+				} else if (strncmp(buf, "quit", 4) == 0) {
+					dprintf(sck, "Goodbye !\n");
+					run = 0;
+				} else {
+					dprintf(sck, "%s command not found. Try : help \n", buf);
+				}
 			}
 		}
 	}
 	close(sck);
 	exit(0);
 }
-
-void handler(int sig)
-{
+//Handler signal SIGCHLD  clean up t_child[] socket and nb
+void handler(int sig) {
 	pid_t pid;
 
 	pid = wait(NULL);
-	for (int i = 0; i < MAX; i++)
-	{
-		if (child[i].pid == pid)
-		{
+	for (int i = 0; i < MAX; i++) {
+		if (child[i].pid == pid) {
 			child[i].pid = -1;
 			write(child[i].socket, "", 0);
 			close(child[i].socket);
 			child[i].socket = -1;
-			printf("free child");
 		}
 	}
 	nb--;
-	//printf("Pid %d exited. opens: %d \n", pid, nb);
 }
 
-int child_slot()
-{
+//Search empty slot in child
+int child_slot() {
 	for (int i = 0;i < MAX; i++) {
 		if (child[i].pid == -1) {
-			//printf("Child found %d\n", i);
 			return (i);
 		}
 	}
 	return (-1);
 }
 
-int main( int argc, char** argv)
-{
+int main( int argc, char** argv) {
 	nb = 0;
 	int sck, client, addrlen;
 	struct sockaddr_in this_addr, peer_addr;
@@ -135,9 +138,7 @@ int main( int argc, char** argv)
 	while( -1 != (client = accept( sck, (struct sockaddr*)&peer_addr, &addrlen ) ) ) {
 		int slot = -1;
 		slot = child_slot();
-		if (slot >= 0)
-		{
-
+		if (slot >= 0) {
 			child[slot].socket = client;
 			nb++;
 			child_pid = fork();
