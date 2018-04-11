@@ -93,9 +93,9 @@ case "${1:-''}" in
 
   'status')
 	if durex_status check_alive nowarn; then
-	  log_action_msg "$($DUREX version)"
+	  log_action_msg "Durex is alive"
 	else
-	  log_action_msg "Durex is stopped."
+	  log_action_msg "Durex is stopped"
 	  exit 3
 	fi
   	;;

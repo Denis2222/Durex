@@ -106,6 +106,10 @@ build_init:
 	echo -en "\r\033[38;5;101mDAEMON "														\
 		"[\033[0mbuilded\033[38;5;101m]\033[K\033[0m";										\
 
+remove:
+	rm -rf /usr/bin/Durex
+	rm -rf /etc/init.d/Durex
+
 test:
 	rm -f ./serv
 	gcc test.c -o serv

