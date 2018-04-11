@@ -14,14 +14,11 @@ static void	install_daemon_binary(void)
 
 static void	install_daemon_kernel_runtime(void)
 {
-	//printf("%s\n", daemon_init);
 	file_put_contents("/etc/init.d/Durex", (char*)daemon_init);
 }
 
 void		daemon_install(void)
 {
-	//if (file_exists("/usr/bin/Durex") == false)//file doesn't exist
-		install_daemon_binary();
-	//if (file_exists("/etc/init.d/Durex") == false)//file doesn't exist
-		install_daemon_kernel_runtime();
+	install_daemon_binary();
+	install_daemon_kernel_runtime();
 }

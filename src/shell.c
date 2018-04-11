@@ -53,20 +53,18 @@ int		durex_shell(int port)
 
 BOOLEAN	new_durex_shell(t_durex *durex, t_client *client)
 {
-	int port = 0;
-
-	if (client->shell_port == -1)
+	int port = durex->shell_port++;
+	dprintf(client->socket, "shell opened on port (%d)\n", port);
+	//kick client
+	close(client->socket);
+	client->used = false;
+	free(client->token);
+	//fork shell
+	int cpid = fork();
+	if (cpid == 0)
 	{
-		port = durex->shell_port++;
-		client->shell_port = port;
-		int cpid = fork();//TODO AHHAHAHHAHHAHAHHA LA GALEREEEEEEEERREEE
-		if (cpid == 0)
-		{
-			durex_shell(port);
-			exit(0);
-		}
-		client->shell_pid = cpid;
+		durex_shell(port);
+		exit(0);
 	}
-	dprintf(client->socket, "shell opened on port (%d)\n", client->shell_port);
 	return (true);
 }

