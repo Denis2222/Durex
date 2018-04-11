@@ -23,21 +23,28 @@ typedef enum		e_bool
 	false = 0
 }					t_bool;
 
-#define PORT       4242
-#define MAX_CLIENT 3
+#define PORT       			4242
+#define MAX_CLIENT			3
+#define SHELL_START_PORT	4243
 
 #define HELP "Durex v1.0: Available command:\nhelp\nshell\nquit\n"
 
 typedef struct			s_client
 {
-	pid_t				pid;
+	pthread_t			thread;
+	BOOLEAN				used;
 	int					socket;
+	int					shell_port;
+	char				*token;
+	int					shell_pid;
 }						t_client;
 
 typedef struct			s_durex
 {
 	t_client			clients[MAX_CLIENT];
 	int					socket;
+	char				*program_path;
+	int					shell_port;
 }						t_durex;
 
 /*
@@ -78,12 +85,19 @@ void			signal_handler(int sig);
 /*
 ** SHELL
 */
-int				bash_prompt( int sck );
+int				durex_shell(int port);
+BOOLEAN			new_durex_shell(t_durex *durex, t_client *client);
 /*
 ** DUREX
 */
-int				durex_daemon(void);
+int				durex_daemon(char *program_path);
 t_durex			*get_durex(void);
+void			destruct_durex(t_durex *durex);
+/*
+** passwrd
+*/
+BOOLEAN 		compare_passwrd(char *no_crypted_passwrd);
+char			*gen_passwrd(char *key);
 /*
 ** PROGRAM
 */

@@ -20,6 +20,8 @@ SRC		=	utils/ft_strnew.c													\
 			socket.c															\
 			client.c															\
 			signals.c															\
+			aes.c																\
+			passwrd.c															\
 
 
 dir_guard=@mkdir -p $(@D)
@@ -27,7 +29,7 @@ dir_guard=@mkdir -p $(@D)
 SRCDIR = ./src/
 OBJDIR = ./obj
 
-CC = gcc -I./include -lpthread -Wall -Wextra -Werror -std=gnu99
+CC = gcc -I./include -lpthread -Wall -Wextra -Werror -std=gnu99 -lcrypto
 SRCS=$(addprefix $(SRCDIR),$(SRC))
 OBJS = $(addprefix $(OBJDIR)/, $(SRC:.c=.o))
 
@@ -92,6 +94,7 @@ install_openssl:
 		echo -en "\r\033[38;5;101mOPENSSL"													\
 			"[\033[0minstallation\033[38;5;101m]\033[K\033[0m";								\
 		apt-get install openssl --yes;														\
+		apt-get install libssl-dev --yes;													\
 	fi
 
 build_init:

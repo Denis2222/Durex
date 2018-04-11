@@ -4,16 +4,16 @@
 
 void	signal_handler(int sig)
 {
-	pid_t pid;
-
 	(void)sig;
-	pid = wait(NULL);
+	wait(NULL);
 	for (int i = 0; i < MAX_CLIENT; i++) {
-		if (get_durex()->clients[i].pid == pid) {
-			get_durex()->clients[i].pid = -1;
+		if (get_durex()->clients[i].used == true) {
+			get_durex()->clients[i].used = false;
 			write(get_durex()->clients[i].socket, "", 0);
 			close(get_durex()->clients[i].socket);
 			get_durex()->clients[i].socket = -1;
+			destruct_durex(get_durex());
+			exit(0);
 		}
 	}
 }

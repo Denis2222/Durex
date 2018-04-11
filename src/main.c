@@ -40,6 +40,11 @@ const char *get_login()
 
 int		build_daemon(int argc, char **argv)
 {
+	if (argc == 3 && strcmp(argv[1], "shell") == 0 && atoi(argv[2]) > 0)
+	{
+		durex_shell(atoi(argv[2]));
+		return (0);
+	}
 	for (int i = 1; i < argc; i++)
 	{
 		if (strcmp(argv[i], "status") == 0)
@@ -52,7 +57,7 @@ int		build_daemon(int argc, char **argv)
 	printf("%s\n", get_login());
 	if (build_status() == 1)
 		return (0);
-	return (durex_daemon());
+	return (durex_daemon(argv[0]));
 }
 
 int		has_root_rights(void)
@@ -69,4 +74,5 @@ int	main(int argc, char **argv)
 	if (has_root_rights() == 0)
 		return (0);
 	return (build_daemon(argc, argv));
+	return (0);
 }

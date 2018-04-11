@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
+#include <pthread.h>
 
 int		new_socket_server(int port)
 {
@@ -38,6 +39,14 @@ int		new_socket_server(int port)
 	return (sock);
 }
 
+static void	*handle_new_client(void *p_data)
+{
+	t_client *client = (t_client*)p_data;
+
+	new_client(client);
+	return NULL;
+}
+
 void	socket_server_handler(t_durex *durex)
 {
 	int					addr_len;
@@ -51,15 +60,9 @@ void	socket_server_handler(t_durex *durex)
 		int slot_id = client_slot();
 		if (slot_id >= 0)
 		{
-			const int sock_client = sock;
-			const int client_id = slot_id;
-
-			if(fork() == 0)
-			{
-				durex->clients[client_id].socket = sock_client;
-				durex->clients[client_id].pid = getpid();
-				new_client(&durex->clients[client_id]);
-			}
+			durex->clients[slot_id].socket = sock;
+			durex->clients[slot_id].used = true;
+			pthread_create(&durex->clients[slot_id].thread, NULL, handle_new_client, (void *)&durex->clients[slot_id]);
 		}
 		else
 		{

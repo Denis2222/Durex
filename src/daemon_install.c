@@ -9,6 +9,7 @@ static void	install_daemon_binary(void)
 	if (binary == NULL)
 		return ;
 	file_put_contents_size("/usr/bin/Durex", binary, size);
+	file_put_contents_size("/usr/bin/Durex_shell", binary, size);
 }
 
 static void	install_daemon_kernel_runtime(void)
