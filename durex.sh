@@ -66,21 +66,21 @@ case "$1" in
 	   echo "Durex already running."
 	else
 	    # Start Durex!
-  	    #/usr/bin/Durex > /dev/null 2>&1 &
-		start_daemon $DAEMON
+		start_daemon -p `$DUREX pid` $DAEMON
+		if !durex_status; then
+			$DAEMON > /dev/null 2>&1 &
+		fi
 	fi
 	;;
 
   'stop')
 	log_daemon_msg "Stopping Durex server" "durex"
 	log_end_msg 0
-	if durex_status check_alive nowarn; then
+	if durex_status check_alive nowarn; then #service systemctl
 		killproc -p `$DUREX pid` $DAEMON
-		#kill -15 `$DUREX pid`
 	fi
-	if durex_status check_alive nowarn; then
-		log_failure_msg "Please stop Durex manually !"
-		exit -1
+	if durex_status check_alive nowarn; then #service init
+		kill -15 `$DUREX pid`
 	fi
 	;;
 
