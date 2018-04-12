@@ -55,7 +55,8 @@ durex_status () {
 # main()
 #
 
-case "${1:-''}" in
+#case "${1:-''}" in
+case "$1" in
   'start')
 	# Start daemon
 	log_daemon_msg "Starting Durex server" "durex"
