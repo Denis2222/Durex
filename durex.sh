@@ -14,15 +14,22 @@
 #                    Denis Moureu <dmoureu-@student.42.fr>
 #
 
-PATH="/bin:/usr/bin:/sbin:/usr/sbin"
-DAEMON="/usr/bin/Durex"
-SELF=$(cd $(dirname $0); pwd -P)/$(basename $0)
+set -e
+set -u
+${DEBIAN_SCRIPT_DEBUG:+ set -v -x};
 
-# exit if DAEMON dosen't exists
-test -x $DAEMON || exit 0
-
-# daemon library
 . /lib/lsb/init-functions
+
+PATH="/usr/bin/:/bin/"
+SELF=$(cd $(dirname $0); pwd -P)/$(basename $0)
+DUREX="/usr/bin/Durex"
+
+# priority can be overriden and "-s" adds output to stderr
+ERR_LOGGER="logger -p daemon.err -t /etc/init.d/Durex -i"
+
+# Safeguard (relative paths, core dumps..)
+cd /
+umask 077
 
 ## Checks if there is a server running and if so if it is accessible.
 #
@@ -32,13 +39,16 @@ test -x $DAEMON || exit 0
 #
 # Usage: boolean durex_status [check_alive|check_dead] [warn|nowarn]
 durex_status () {
-    status_output=`$DAEMON status 2>&1`
+    status_output=`$DUREX status 2>&1`
 	ping_alive=$?
     if [ "$1" = "check_alive"  -a  $ping_alive = 1 ] ||
        [ "$1" = "check_dead"   -a  $ping_alive = 0 ]; then
-			return 0 # OFFLINE
+	return 0 # EXIT_SUCCESS
     else
-			return 1 # ONLINE
+  	if [ "$2" = "warn" ]; then
+  	    echo -e "processes alive and '$DUREX status' resulted in\n" | $ERR_LOGGER -p daemon.debug
+	fi
+  	return 1 # EXIT_FAILURE
     fi
 }
 
@@ -46,10 +56,8 @@ durex_status () {
 # main()
 #
 
-#case "${1:-''}" in
-case "$1" in
+case "${1:-''}" in
   'start')
-	$SELF system-reload
 	# Start daemon
 	log_daemon_msg "Starting Durex server" "durex"
 	log_end_msg 0
@@ -57,53 +65,42 @@ case "$1" in
 	   echo "Durex already running."
 	else
 	    # Start Durex!
-		start_daemon -p `$DAEMON pid` $DAEMON > /dev/null 2>&1
-		# if durex_status check_alive nowarn; then
-		# 	exit 0
-		# else
-		# 	$DAEMON " " > /dev/null 2>&1 &
-		# fi
+  	    /usr/bin/Durex > /dev/null 2>&1 &
 	fi
 	;;
 
   'stop')
-	$SELF system-reload
 	log_daemon_msg "Stopping Durex server" "durex"
 	log_end_msg 0
-	if durex_status check_alive nowarn; then #service systemctl
-		killproc -p `$DAEMON pid` $DAEMON
+	if durex_status check_alive nowarn; then
+		kill -15 `$DUREX pid`
 	fi
-	# if durex_status check_alive nowarn; then #service init
-	# 	kill -15 `$DAEMON pid`
-	# fi
+	if durex_status check_alive nowarn; then
+		log_failure_msg "Please stop Durex manually !"
+		exit -1
+	fi
 	;;
 
   'restart')
-	$SELF stop
+	set +e; $SELF stop; set -e
 	$SELF start
 	;;
 
   'reload'|'force-reload')
-	$SELF system-reload
-	log_daemon_msg "Reloading Durex server" "durex"
-	$SELF restart
+  	log_daemon_msg "Reloading Durex server" "durex"
+	$DUREX reload
 	log_end_msg 0
 	;;
 
   'status')
-	$SELF system-reload
 	if durex_status check_alive nowarn; then
 	  log_action_msg "Durex is alive"
 	else
 	  log_action_msg "Durex is stopped"
+	  exit 3
 	fi
-	status_of_proc -p `$DAEMON pid` $DAEMON Durex > /dev/null 2>&1 && exit 0 || exit $?
   	;;
 
-  'system-reload')
-  	# systemctl enable Durex > /dev/null 2>&1
-	# systemctl daemon-reload > /dev/null 2>&1
-	;;
   *)
 	echo "Usage: $SELF start|stop|restart|reload|force-reload|status"
 	exit 1
