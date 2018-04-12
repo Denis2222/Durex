@@ -81,7 +81,9 @@ case "${1:-''}" in
 	;;
 
   'restart')
-	set +e; $SELF stop; set -e
+	if durex_status check_alive nowarn; then
+		set +e; $SELF stop; set -e
+	fi
 	$SELF start
 	;;
 
