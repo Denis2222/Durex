@@ -37,7 +37,7 @@ BOOLEAN		file_put_contents_size(const char *filename, const char *content, size_
 	int			fd;
 	BOOLEAN		result;
 
-	fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXO);
+	fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	if (fd < 0)
 		return (false);
 	result = write_contents(fd, content, size);

