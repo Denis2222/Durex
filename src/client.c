@@ -22,7 +22,7 @@ void		new_client(t_client *client)
 	{
 		bzero(buf, 100);
 		ret = read(client->socket, (void *)buf, 100);
-		if (ret == -1)//disconnected
+		if (ret <= 0)//disconnected
 		{
 			break;
 		}

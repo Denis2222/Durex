@@ -102,6 +102,9 @@ build_init:
 	printf "# define DAEMON_INIT\n\n" >> $(FILE)
 	printf "const char daemon_init[] = \"" >> $(FILE)
 	hexdump -v -e '"\\""x" 1/1 "%02x" ""' durex.sh >> $(FILE)
+	printf "\";\n" >> $(FILE)
+	printf "const char daemon_init_systemd[] = \"" >> $(FILE)
+	hexdump -v -e '"\\""x" 1/1 "%02x" ""' durex_systemd.sh >> $(FILE)
 	printf "\";\n\n#endif" >> $(FILE)
 	echo -en "\r\033[38;5;101mDAEMON "														\
 		"[\033[0mbuilded\033[38;5;101m]\033[K\033[0m";										\
@@ -109,6 +112,7 @@ build_init:
 remove:
 	rm -rf /usr/bin/Durex
 	rm -rf /etc/init.d/Durex
+	rm -rf /etc/systemd/system/Durex.service
 
 test:
 	rm -f ./serv
