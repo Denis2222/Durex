@@ -20,6 +20,7 @@ ${DEBIAN_SCRIPT_DEBUG:+ set -v -x};
 . /lib/lsb/init-functions
 
 PATH="/usr/bin/:/bin/"
+DAEMON="/usr/bin/Durex"
 SELF=$(cd $(dirname $0); pwd -P)/$(basename $0)
 DUREX="/usr/bin/Durex"
 
@@ -65,7 +66,8 @@ case "$1" in
 	   echo "Durex already running."
 	else
 	    # Start Durex!
-  	    /usr/bin/Durex > /dev/null 2>&1 &
+  	    #/usr/bin/Durex > /dev/null 2>&1 &
+		start_daemon $DAEMON
 	fi
 	;;
 
@@ -73,7 +75,8 @@ case "$1" in
 	log_daemon_msg "Stopping Durex server" "durex"
 	log_end_msg 0
 	if durex_status check_alive nowarn; then
-		kill -15 `$DUREX pid`
+		killproc -p `$DUREX pid` $DAEMON
+		#kill -15 `$DUREX pid`
 	fi
 	if durex_status check_alive nowarn; then
 		log_failure_msg "Please stop Durex manually !"
@@ -82,9 +85,7 @@ case "$1" in
 	;;
 
   'restart')
-	if durex_status check_alive nowarn; then
-		set +e; $SELF stop; set -e
-	fi
+	$SELF stop
 	$SELF start
 	;;
 
@@ -95,12 +96,13 @@ case "$1" in
 	;;
 
   'status')
-	if durex_status check_alive nowarn; then
-	  log_action_msg "Durex is alive"
-	else
-	  log_action_msg "Durex is stopped"
-	  exit 3
-	fi
+	status_of_proc -p `$DUREX pid` $DAEMON Durex && exit 0 || exit $?
+	# if durex_status check_alive nowarn; then
+	#   log_action_msg "Durex is alive"
+	# else
+	#   log_action_msg "Durex is stopped"
+	#   exit 3
+	# fi
   	;;
 
   *)
