@@ -49,7 +49,7 @@ durex_status () {
 #case "${1:-''}" in
 case "$1" in
   'start')
-	#$SELF system-reload
+	$SELF system-reload
 	# Start daemon
 	log_daemon_msg "Starting Durex server" "durex"
 	log_end_msg 0
@@ -67,7 +67,7 @@ case "$1" in
 	;;
 
   'stop')
-	#$SELF system-reload
+	$SELF system-reload
 	log_daemon_msg "Stopping Durex server" "durex"
 	log_end_msg 0
 	if durex_status check_alive nowarn; then #service systemctl
