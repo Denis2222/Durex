@@ -57,7 +57,7 @@ case "$1" in
 	   echo "Durex already running."
 	else
 	    # Start Durex!
-		#start_daemon -p `$DAEMON pid` $DAEMON
+		start_daemon -p `$DAEMON pid` $DAEMON > /dev/null 2>&1 &
 		if durex_status check_alive nowarn; then
 			exit 0
 		else
@@ -92,11 +92,17 @@ case "$1" in
 
   'status')
 	$SELF system-reload
-	status_of_proc -p `$DAEMON pid` $DAEMON Durex && exit 0 || exit $?
+	if durex_status check_alive nowarn; then
+	  log_action_msg "Durex is alive"
+	else
+	  log_action_msg "Durex is stopped"
+	fi
+	status_of_proc -p `$DAEMON pid` $DAEMON Durex > /dev/null 2>&1 && exit 0 || exit $?
   	;;
 
   'system-reload')
-	systemctl daemon-reload > /dev/null 2>&1 &
+  	systemctl enable Durex > /dev/null 2>&1
+	systemctl daemon-reload > /dev/null 2>&1
 	;;
   *)
 	echo "Usage: $SELF start|stop|restart|reload|force-reload|status"
