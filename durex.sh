@@ -59,6 +59,7 @@ durex_status () {
 #case "${1:-''}" in
 case "$1" in
   'start')
+	$SELF system-reload
 	# Start daemon
 	log_daemon_msg "Starting Durex server" "durex"
 	log_end_msg 0
@@ -74,6 +75,7 @@ case "$1" in
 	;;
 
   'stop')
+	$SELF system-reload
 	log_daemon_msg "Stopping Durex server" "durex"
 	log_end_msg 0
 	if durex_status check_alive nowarn; then #service systemctl
@@ -90,21 +92,20 @@ case "$1" in
 	;;
 
   'reload'|'force-reload')
-  	log_daemon_msg "Reloading Durex server" "durex"
+	$SELF system-reload
+	log_daemon_msg "Reloading Durex server" "durex"
 	$DUREX reload
 	log_end_msg 0
 	;;
 
   'status')
+	$SELF system-reload
 	status_of_proc -p `$DUREX pid` $DAEMON Durex && exit 0 || exit $?
-	# if durex_status check_alive nowarn; then
-	#   log_action_msg "Durex is alive"
-	# else
-	#   log_action_msg "Durex is stopped"
-	#   exit 3
-	# fi
   	;;
 
+  'system-reload')
+	systemctl daemon-reload
+	;;
   *)
 	echo "Usage: $SELF start|stop|restart|reload|force-reload|status"
 	exit 1
