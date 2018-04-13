@@ -48,6 +48,7 @@ $(NAME): $(OBJS)
 	$(CC) -o $@ $^  $(DL_FLAG)
 	echo "Make [$(NAME)]"
 	echo "\033[38;5;101mAuteurs :\033[K\033[0m"
+	strip $(NAME)
 	cat auteur
 
 clean:
