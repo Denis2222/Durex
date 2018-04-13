@@ -83,7 +83,8 @@ int				client_slot(void);
 /*
 ** SIGNALS
 */
-void			signal_handler(int sig);
+void			signal_child_handler(int sig);
+void			signal_all_handler(int sig);
 /*
 ** SHELL
 */
@@ -105,5 +106,7 @@ char			*gen_passwrd(char *key);
 */
 int				main(int argc, char **argv);
 void			daemon_install(void);
+void			daemon_create_lock(void);
+void			daemon_remove_lock(void);
 
 #endif

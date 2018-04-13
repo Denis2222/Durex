@@ -156,7 +156,7 @@ BOOLEAN		processes_exists(char **names)
 			char *process_name = get_cmd_contents(cmdlines[i]);
 			char *basename = file_base_name(process_name);
 			x = 0;
-			while (names && names[x]) {
+			while (result == false && names && names[x]) {
 				if (!strcmp(basename, names[x])) {
 					result = true;
 				}
@@ -194,7 +194,7 @@ int			processes_exists_pid(char **names)
 			char *process_name = get_cmd_contents(cmdlines[i]);
 			char *basename = file_base_name(process_name);
 			x = 0;
-			while (names && names[x]) {
+			while (result == -1 && names && names[x]) {
 				if (!strcmp(basename, names[x])) {
 					result = pid;
 				}

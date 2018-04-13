@@ -98,6 +98,8 @@ int		build_daemon(int argc, char **argv)
 		daemon_install();
 		return (start_daemon(argc, argv));
 	}
+	if (file_exists("/var/lock/durex.lock") == true)
+		return (0);
 	return (durex_daemon(argv[0]));
 }
 

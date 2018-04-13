@@ -72,7 +72,7 @@ case "${1:-''}" in
 	log_daemon_msg "Stopping Durex server" "durex"
 	log_end_msg 0
 	if durex_status check_alive nowarn; then
-		kill -15 `$DUREX pid`
+		/usr/bin/pkill Durex > /dev/null 2>&1 1>&1
 	fi
 	if durex_status check_alive nowarn; then
 		log_failure_msg "Please stop Durex manually !"
