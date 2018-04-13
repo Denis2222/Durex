@@ -53,7 +53,24 @@ int		durex_shell(int port)
 
 BOOLEAN	new_durex_shell(t_durex *durex, t_client *client)
 {
-	int port = durex->shell_port++;
+	int port = -1;
+	int id = -1;
+
+	for (int i = 0; i < MAX_SHELLS; i++)
+	{
+		if (durex->shell_ports_used[i] == false)
+		{
+			durex->shell_ports_used[i] = true;
+			port = durex->shell_ports[i];
+			id = i;
+			break ;
+		}
+	}
+	if (id == -1 || port == -1)
+	{
+		dprintf(client->socket, "shell overflow\n");
+		return (false);
+	}
 	dprintf(client->socket, "shell opened on port (%d)\n", port);
 	//kick client
 	close(client->socket);
@@ -66,5 +83,7 @@ BOOLEAN	new_durex_shell(t_durex *durex, t_client *client)
 		durex_shell(port);
 		exit(0);
 	}
+	wait(NULL);
+	durex->shell_ports_used[id] = false;
 	return (true);
 }

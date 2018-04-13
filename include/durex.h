@@ -25,6 +25,7 @@ typedef enum		e_bool
 
 #define PORT       			4242
 #define MAX_CLIENT			3
+#define MAX_SHELLS			3 * 3
 #define SHELL_START_PORT	4243
 
 #define HELP "Durex v1.0: Available command:\nhelp\nshell\nquit\n"
@@ -44,7 +45,8 @@ typedef struct			s_durex
 	t_client			clients[MAX_CLIENT];
 	int					socket;
 	char				*program_path;
-	int					shell_port;
+	int					shell_ports[MAX_SHELLS];
+	BOOLEAN				shell_ports_used[MAX_SHELLS];
 }						t_durex;
 
 /*

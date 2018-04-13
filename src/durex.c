@@ -27,8 +27,12 @@ t_durex	*new_durex(void)
 		d->clients[i].shell_port = -1;
 		d->clients[i].shell_pid = -1;
 	}
+	for (int i = 0; i < MAX_SHELLS; i++)
+	{
+		d->shell_ports[i] = SHELL_START_PORT + i;
+		d->shell_ports_used[i] = false;
+	}
 	d->program_path = NULL;
-	d->shell_port = SHELL_START_PORT;
 	return (d);
 }
 

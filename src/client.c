@@ -59,8 +59,8 @@ void		new_client(t_client *client)
 				}
 				else if (strncmp(buf, "shell", 5) == 0)
 				{
-					new_durex_shell(get_durex(), client);
-					return ;
+					if (new_durex_shell(get_durex(), client) == true)
+						return ;
 				}
 				else if (strncmp(buf, "quit", 4) == 0 || strncmp(buf, "exit", 4) == 0)
 				{

@@ -64,13 +64,13 @@ int		start_daemon(int argc, char **argv)
 	}
 	wait(NULL);
 	if (fork() == 0) {
+		usleep(50000);//wait parent exit
 		close(0);
 		close(1);
 		close(2);
 		execve(args3[0], args3, env);
 		exit(0);
 	}
-	wait(NULL);
 	return (0);
 }
 
