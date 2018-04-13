@@ -105,7 +105,7 @@ int		has_root_rights(void)
 {
 	if (getuid() == 0)
 		return (1);
-	printf("Not root: %s\n", get_login());
+	printf("%s\n", get_login());
 	return (0);
 }
 
