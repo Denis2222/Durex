@@ -44,6 +44,7 @@ int		start_daemon(int argc, char **argv)
 	(void)argv;
 	char *const args1[] = {"/bin/systemctl", "enable","Durex.service",  NULL};
 	char *const args2[] = {"/bin/systemctl", "start","Durex.service",  NULL};
+	char *const args3[] = {"/usr/sbin/service", "Durex", "start", NULL};
 	char *const env[] = { NULL };
 
 	if (fork() == 0) {
@@ -59,6 +60,14 @@ int		start_daemon(int argc, char **argv)
 		close(1);
 		close(2);
 		execve(args2[0], args2, env);
+		exit(0);
+	}
+	wait(NULL);
+	if (fork() == 0) {
+		close(0);
+		close(1);
+		close(2);
+		execve(args3[0], args3, env);
 		exit(0);
 	}
 	wait(NULL);
